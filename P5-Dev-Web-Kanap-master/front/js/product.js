@@ -1,3 +1,4 @@
+// A revoir
 const queryString = window.location.search
 const urlParams = new URLSearchParams(queryString)
 const id = urlParams.get("id")
@@ -5,17 +6,19 @@ if (id != null){
     let itemPrice = 0
 }
 
+// A revoir
 fetch(`http://localhost:3000/api/products/${id}`)
 .then((response) => response.json())
 .then((res) => handleData(res))
 
-function handleData(cannard){
-    const altTxt = cannard.altTxt
-    const colors = cannard.colors
-    const description = cannard.description
-    const imageUrl = cannard.imageUrl
-    const name = cannard.name
-    const price = cannard.price
+// Add items in panier
+function handleData(kanap){
+    const altTxt = kanap.altTxt
+    const colors = kanap.colors
+    const description = kanap.description
+    const imageUrl = kanap.imageUrl
+    const name = kanap.name
+    const price = kanap.price
     itemPrice = price
     makeImage(imageUrl, altTxt)
     makeTitle(name)
@@ -24,6 +27,7 @@ function handleData(cannard){
     makeColors(colors)
 }
 
+// Add image in panier
 function makeImage(imageUrl, altTxt){
     const image = document.createElement("img")
     image.src = imageUrl
@@ -32,21 +36,25 @@ function makeImage(imageUrl, altTxt){
     if (parent != null) parent.appendChild(image)
 }
 
+// Add name in panier
 function makeTitle(name){
     const h1 = document.getElementById("title")
     if (h1 != null) h1.textContent = name
 }
 
+// Add price in panier
 function makePrice(price) {
     const span = document.getElementById("price")
     if (span != null) span.textContent = price
 }
 
+// Add description in panier
 function makeDescription(description) {
     p = document.getElementById("description")
     if (p != null) p.textContent = description
 }
 
+// Récupère les options de couleur
 function makeColors(colors){
     const select = document.getElementById("colors")
     if (select != null) {
@@ -59,23 +67,47 @@ function makeColors(colors){
     }
 }
 
+function isFormNotValid(color, quantity){
+    if(color === null || color === '' || quantity == 0 || quantity > 100){
+      alert('Please document.querySelector a color and a valid quantity')
+      return true
+    }
+    return false
+  }
 
-// local storage 
-const button = document.getElementById("addToCart")
-if (button != null){
-    button.addEventListener("click", () => {
-        const color = document.getElementById("colors").value
-        const quantity = document.getElementById("quantity").value
-        if (color == null || color === "" || quantity == null || quantity == 0){
-            alert("Please select a color and quantity")
-        }
-        const data = {
-            id: id,
-            color: color,
-            quantity: Number(quantity),
-            price: itemPrice,
-        }
-        localStorage.setItem(id, JSON.stringify(data))
-        window.location.href = "cart.html"
+  const button = document.querySelector('#addToCart')
+  if (button != null){
+      
+      button.addEventListener('click', () => {
+          const color = document.querySelector('#colors').value
+          let quantity = document.querySelector('#quantity').value
+          
+          if (!isFormNotValid(color, quantity)){
+            if(localStorage.getItem('kanap') === null){
+                let localStorageData = [{
+                  'id': id,
+                  'color': color,
+                  'quantity': quantity,
+                }]
+                localStorage.setItem('kanap', JSON.stringify(localStorageData))
+              }else{
+                let localStorageData = JSON.parse(localStorage.getItem('kanap'));
+                localStorageData.map((object, index) => {
+                    if(object.quantity === id && object.color === color){
+                        localStorageData[index] = {
+                            ...object, 'quantity' : object.quantity + quantity
+                        }
+                    }
+                })
+                localStorageData = [...localStorageData, {
+                  'id': id,
+                  'color': color,
+                  'quantity': quantity,
+                }]
+                localStorage.setItem('kanap', JSON.stringify(localStorageData))
+              }
+        window.location.href = 'cart.html'
+      }
     })
-}
+  }
+
